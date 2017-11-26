@@ -1,7 +1,7 @@
 Bitcore Integration
 ===================
 
-What's the difference between the official bitcoin and bitpay-bitcoin? See:
+We implemented bitcore features in this repo by researching the difference between the official bitcoin and bitpay-bitcoin. See:
 
 https://github.com/bitcoin/bitcoin/compare/9779e1e...bitpay:597c9b4
 
