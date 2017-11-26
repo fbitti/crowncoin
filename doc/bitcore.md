@@ -13,6 +13,8 @@ All files in `qa/rpc-tests` are not added yet, because the test framework seems 
 
 The predecessor of `CDBWrapper` is `CLevelDBWrapper`. So bitpay-bitcoin's `CDBWrapper` should be renamed.
 
-Obfuscation isn't supported in v0.10. So bitpay-bitcoin's obfuscation-related code should be removed.
+Obfuscation isn't supported in v0.10. So bitpay-bitcoin's obfuscation-related code should be removed. `CLevelDBWrapper` function shouldn't take `obfuscate` parameter.
 
 In `src/main.cpp`, v0.10 uses `state.Abort`, but v0.12 doesn't use this -- it uses `AbortNode`. My inserted code uses `AbortNode`.
+
+`GetTransaction` function in v0.10 takes 4 parameters. In v0.12 it takes 5 parameters. My inserted code uses 4 parameters.
