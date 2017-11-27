@@ -20,3 +20,5 @@ In `src/main.cpp`, v0.10 uses `state.Abort`, but v0.12 doesn't use this -- it us
 `GetTransaction` function in v0.10 takes 4 parameters. In v0.12 it takes 5 parameters. My inserted code uses 4 parameters.
 
 In `src/rpcserver.cpp`, each element in `vRPCCommands` array has 2 additional booleans (`threadSafe` and `reqWallet`) in v0.10, but v0.12 lacks them. My inserted code has those booleans. What I inserted is all `false` -- very likely that's incorrect.
+
+Note: v0.10 and v0.12 in this article mean the versions of Bitcoin Core, not Crown Core.
