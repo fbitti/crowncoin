@@ -18,3 +18,5 @@ Obfuscation isn't supported in v0.10. So bitpay-bitcoin's obfuscation-related co
 In `src/main.cpp`, v0.10 uses `state.Abort`, but v0.12 doesn't use this -- it uses `AbortNode`. My inserted code uses `AbortNode`.
 
 `GetTransaction` function in v0.10 takes 4 parameters. In v0.12 it takes 5 parameters. My inserted code uses 4 parameters.
+
+In `src/rpcserver.cpp`, each element in `vRPCCommands` array has 2 additional booleans (`threadSafe` and `reqWallet`) in v0.10, but v0.12 lacks them. My inserted code has those booleans. What I inserted is all `false` -- very likely that's incorrect.
