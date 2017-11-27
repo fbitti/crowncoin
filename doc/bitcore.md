@@ -21,4 +21,6 @@ In `src/main.cpp`, v0.10 uses `state.Abort`, but v0.12 doesn't use this -- it us
 
 In `src/rpcserver.cpp`, each element in `vRPCCommands` array has 2 additional booleans (`threadSafe` and `reqWallet`) in v0.10, but v0.12 lacks them. My inserted code has those booleans. I set them to all `false` -- maybe that's incorrect.
 
+`src/serialized.h` isn't changed because I can't find any existing function names starting with `ser_`. That may be incorrect.
+
 Note: v0.10 and v0.12 in this article mean the versions of Bitcoin Core, not Crown Core.
