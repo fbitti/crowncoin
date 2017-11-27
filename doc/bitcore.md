@@ -7,7 +7,7 @@ https://github.com/bitcoin/bitcoin/compare/9779e1e...bitpay:597c9b4
 
 Basically, it adds "address index" feature.
 
-But the difficulty of integrating it into Crown is that Crown is based on v0.10, while bitpay-bitcoin is based on v0.12. Notable differences:
+But the difficulty of integrating it into Crown is that Crown is based on v0.10, while bitpay-bitcoin is based on v0.12. Notable changes:
 
 All files in `qa/rpc-tests` are not added yet, because the test framework seems different.
 
