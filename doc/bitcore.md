@@ -11,7 +11,7 @@ But the difficulty of integrating it into Crown is that Crown is based on v0.10,
 
 All files in `qa/rpc-tests` are not added yet, because the test framework seems different.
 
-The predecessor of `CDBWrapper` is `CLevelDBWrapper`. So bitpay-bitcoin's `CDBWrapper` should be renamed.
+In v0.10 there's no `src/dbwrapper.cpp` but `src/leveldbwrapper.cpp`, so all changes in `dbwrapper.cpp` should be reflected in `leveldbwrapper.cpp`. `CDBWrapper` also maps to `CLevelDBWrapper`.
 
 Obfuscation isn't supported in v0.10. So bitpay-bitcoin's obfuscation-related code should be removed. `CLevelDBWrapper` function shouldn't take `obfuscate` parameter.
 
