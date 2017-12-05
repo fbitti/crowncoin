@@ -111,9 +111,9 @@ Object blockHeaderToJSON(const CBlock& block, const CBlockIndex* blockindex)
     return result;
 }
 
-UniValue blockToDeltasJSON(const CBlock& block, const CBlockIndex* blockindex)
+Object blockToDeltasJSON(const CBlock& block, const CBlockIndex* blockindex)
 {
-    UniValue result(UniValue::VOBJ);
+    Object result;
     result.push_back(Pair("hash", block.GetHash().GetHex()));
     int confirmations = -1;
     // Only report confirmations if the block is on the main chain
@@ -125,27 +125,27 @@ UniValue blockToDeltasJSON(const CBlock& block, const CBlockIndex* blockindex)
     result.push_back(Pair("confirmations", confirmations));
     result.push_back(Pair("size", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION)));
     result.push_back(Pair("height", blockindex->nHeight));
-    result.push_back(Pair("version", block.nVersion));
+    result.push_back(Pair("version", block.nVersion.GetFullVersion()));
     result.push_back(Pair("merkleroot", block.hashMerkleRoot.GetHex()));
 
-    UniValue deltas(UniValue::VARR);
+    Array deltas;
 
     for (unsigned int i = 0; i < block.vtx.size(); i++) {
         const CTransaction &tx = block.vtx[i];
         const uint256 txhash = tx.GetHash();
 
-        UniValue entry(UniValue::VOBJ);
+        Object entry;
         entry.push_back(Pair("txid", txhash.GetHex()));
         entry.push_back(Pair("index", (int)i));
 
-        UniValue inputs(UniValue::VARR);
+        Array inputs;
 
         if (!tx.IsCoinBase()) {
 
             for (size_t j = 0; j < tx.vin.size(); j++) {
                 const CTxIn input = tx.vin[j];
 
-                UniValue delta(UniValue::VOBJ);
+                Object delta;
 
                 CSpentIndexValue spentInfo;
                 CSpentIndexKey spentKey(input.prevout.hash, input.prevout.n);
@@ -173,12 +173,12 @@ UniValue blockToDeltasJSON(const CBlock& block, const CBlockIndex* blockindex)
 
         entry.push_back(Pair("inputs", inputs));
 
-        UniValue outputs(UniValue::VARR);
+        Array outputs;
 
         for (unsigned int k = 0; k < tx.vout.size(); k++) {
             const CTxOut &out = tx.vout[k];
 
-            UniValue delta(UniValue::VOBJ);
+            Object delta;
 
             if (out.scriptPubKey.IsPayToScriptHash()) {
                 vector<unsigned char> hashBytes(out.scriptPubKey.begin()+2, out.scriptPubKey.begin()+22);
@@ -343,7 +343,7 @@ Value getrawmempool(const Array& params, bool fHelp)
     }
 }
 
-UniValue getblockdeltas(const UniValue& params, bool fHelp)
+json_spirit::Value getblockdeltas(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error("");
@@ -360,13 +360,13 @@ UniValue getblockdeltas(const UniValue& params, bool fHelp)
     if (fHavePruned && !(pblockindex->nStatus & BLOCK_HAVE_DATA) && pblockindex->nTx > 0)
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Block not available (pruned data)");
 
-    if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus()))
-        throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
+    //if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus()))
+    //    throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
 
     return blockToDeltasJSON(block, pblockindex);
 }
 
-UniValue getblockhashes(const UniValue& params, bool fHelp)
+json_spirit::Value getblockhashes(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 2)
         throw runtime_error(
@@ -402,16 +402,16 @@ UniValue getblockhashes(const UniValue& params, bool fHelp)
     bool fLogicalTS = false;
 
     if (params.size() > 2) {
-        if (params[2].isObject()) {
-            UniValue noOrphans = find_value(params[2].get_obj(), "noOrphans");
-            UniValue returnLogical = find_value(params[2].get_obj(), "logicalTimes");
+        //if (params[2].isObject()) {
+        //    Object noOrphans = find_value(params[2].get_obj(), "noOrphans");
+        //    Object returnLogical = find_value(params[2].get_obj(), "logicalTimes");
 
-            if (noOrphans.isBool())
-                fActiveOnly = noOrphans.get_bool();
+        //    if (noOrphans.isBool())
+        //        fActiveOnly = noOrphans.get_bool();
 
-            if (returnLogical.isBool())
-                fLogicalTS = returnLogical.get_bool();
-        }
+        //    if (returnLogical.isBool())
+        //        fLogicalTS = returnLogical.get_bool();
+        //}
     }
 
     std::vector<std::pair<uint256, unsigned int> > blockHashes;
@@ -423,11 +423,11 @@ UniValue getblockhashes(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for block hashes");
     }
 
-    UniValue result(UniValue::VARR);
+    Array result;
 
     for (std::vector<std::pair<uint256, unsigned int> >::const_iterator it=blockHashes.begin(); it!=blockHashes.end(); it++) {
         if (fLogicalTS) {
-            UniValue item(UniValue::VOBJ);
+            Object item;
             item.push_back(Pair("blockhash", it->first.GetHex()));
             item.push_back(Pair("logicalts", (int)it->second));
             result.push_back(item);

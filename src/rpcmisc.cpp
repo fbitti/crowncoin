@@ -522,7 +522,7 @@ bool getAddressFromIndex(const int &type, const uint160 &hash, std::string &addr
     return true;
 }
 
-bool getAddressesFromParams(const UniValue& params, std::vector<std::pair<uint160, int> > &addresses)
+bool getAddressesFromParams(const Array& params, std::vector<std::pair<uint160, int> > &addresses)
 {
     if (params[0].isStr()) {
         CBitcoinAddress address(params[0].get_str());
@@ -534,14 +534,14 @@ bool getAddressesFromParams(const UniValue& params, std::vector<std::pair<uint16
         addresses.push_back(std::make_pair(hashBytes, type));
     } else if (params[0].isObject()) {
 
-        UniValue addressValues = find_value(params[0].get_obj(), "addresses");
+        Object addressValues = find_value(params[0].get_obj(), "addresses");
         if (!addressValues.isArray()) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Addresses is expected to be an array");
         }
 
-        std::vector<UniValue> values = addressValues.getValues();
+        std::vector<Object> values = addressValues.getValues();
 
-        for (std::vector<UniValue>::iterator it = values.begin(); it != values.end(); ++it) {
+        for (std::vector<Object>::iterator it = values.begin(); it != values.end(); ++it) {
 
             CBitcoinAddress address(it->get_str());
             uint160 hashBytes;
@@ -568,7 +568,7 @@ bool timestampSort(std::pair<CMempoolAddressDeltaKey, CMempoolAddressDelta> a,
     return a.second.time < b.second.time;
 }
 
-UniValue getaddressmempool(const UniValue& params, bool fHelp)
+Object getaddressmempool(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error(
@@ -613,7 +613,7 @@ UniValue getaddressmempool(const UniValue& params, bool fHelp)
 
     std::sort(indexes.begin(), indexes.end(), timestampSort);
 
-    UniValue result(UniValue::VARR);
+    Array result;
 
     for (std::vector<std::pair<CMempoolAddressDeltaKey, CMempoolAddressDelta> >::iterator it = indexes.begin();
          it != indexes.end(); it++) {
@@ -623,7 +623,7 @@ UniValue getaddressmempool(const UniValue& params, bool fHelp)
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unknown address type");
         }
 
-        UniValue delta(UniValue::VOBJ);
+        Object delta;
         delta.push_back(Pair("address", address));
         delta.push_back(Pair("txid", it->first.txhash.GetHex()));
         delta.push_back(Pair("index", (int)it->first.index));
@@ -639,7 +639,7 @@ UniValue getaddressmempool(const UniValue& params, bool fHelp)
     return result;
 }
 
-UniValue getaddressutxos(const UniValue& params, bool fHelp)
+Object getaddressutxos(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error(
@@ -672,7 +672,7 @@ UniValue getaddressutxos(const UniValue& params, bool fHelp)
 
     bool includeChainInfo = false;
     if (params[0].isObject()) {
-        UniValue chainInfo = find_value(params[0].get_obj(), "chainInfo");
+        Object chainInfo = find_value(params[0].get_obj(), "chainInfo");
         if (chainInfo.isBool()) {
             includeChainInfo = chainInfo.get_bool();
         }
@@ -694,10 +694,10 @@ UniValue getaddressutxos(const UniValue& params, bool fHelp)
 
     std::sort(unspentOutputs.begin(), unspentOutputs.end(), heightSort);
 
-    UniValue utxos(UniValue::VARR);
+    Array utxos;
 
     for (std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> >::const_iterator it=unspentOutputs.begin(); it!=unspentOutputs.end(); it++) {
-        UniValue output(UniValue::VOBJ);
+        Object output;
         std::string address;
         if (!getAddressFromIndex(it->first.type, it->first.hashBytes, address)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unknown address type");
@@ -713,7 +713,7 @@ UniValue getaddressutxos(const UniValue& params, bool fHelp)
     }
 
     if (includeChainInfo) {
-        UniValue result(UniValue::VOBJ);
+        Object result;
         result.push_back(Pair("utxos", utxos));
 
         LOCK(cs_main);
@@ -725,7 +725,7 @@ UniValue getaddressutxos(const UniValue& params, bool fHelp)
     }
 }
 
-UniValue getaddressdeltas(const UniValue& params, bool fHelp)
+Object getaddressdeltas(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1 || !params[0].isObject())
         throw runtime_error(
@@ -758,10 +758,10 @@ UniValue getaddressdeltas(const UniValue& params, bool fHelp)
         );
 
 
-    UniValue startValue = find_value(params[0].get_obj(), "start");
-    UniValue endValue = find_value(params[0].get_obj(), "end");
+    Object startValue = find_value(params[0].get_obj(), "start");
+    Object endValue = find_value(params[0].get_obj(), "end");
 
-    UniValue chainInfo = find_value(params[0].get_obj(), "chainInfo");
+    Object chainInfo = find_value(params[0].get_obj(), "chainInfo");
     bool includeChainInfo = false;
     if (chainInfo.isBool()) {
         includeChainInfo = chainInfo.get_bool();
@@ -801,7 +801,7 @@ UniValue getaddressdeltas(const UniValue& params, bool fHelp)
         }
     }
 
-    UniValue deltas(UniValue::VARR);
+    Array deltas;
 
     for (std::vector<std::pair<CAddressIndexKey, CAmount> >::const_iterator it=addressIndex.begin(); it!=addressIndex.end(); it++) {
         std::string address;
@@ -809,7 +809,7 @@ UniValue getaddressdeltas(const UniValue& params, bool fHelp)
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unknown address type");
         }
 
-        UniValue delta(UniValue::VOBJ);
+        Object delta;
         delta.push_back(Pair("satoshis", it->second));
         delta.push_back(Pair("txid", it->first.txhash.GetHex()));
         delta.push_back(Pair("index", (int)it->first.index));
@@ -819,7 +819,7 @@ UniValue getaddressdeltas(const UniValue& params, bool fHelp)
         deltas.push_back(delta);
     }
 
-    UniValue result(UniValue::VOBJ);
+    Object result;
 
     if (includeChainInfo && start > 0 && end > 0) {
         LOCK(cs_main);
@@ -831,8 +831,8 @@ UniValue getaddressdeltas(const UniValue& params, bool fHelp)
         CBlockIndex* startIndex = chainActive[start];
         CBlockIndex* endIndex = chainActive[end];
 
-        UniValue startInfo(UniValue::VOBJ);
-        UniValue endInfo(UniValue::VOBJ);
+        Object startInfo;
+        Object endInfo;
 
         startInfo.push_back(Pair("hash", startIndex->GetBlockHash().GetHex()));
         startInfo.push_back(Pair("height", start));
@@ -850,7 +850,7 @@ UniValue getaddressdeltas(const UniValue& params, bool fHelp)
     }
 }
 
-UniValue getaddressbalance(const UniValue& params, bool fHelp)
+Object getaddressbalance(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error(
@@ -898,7 +898,7 @@ UniValue getaddressbalance(const UniValue& params, bool fHelp)
         balance += it->second;
     }
 
-    UniValue result(UniValue::VOBJ);
+    Object result;
     result.push_back(Pair("balance", balance));
     result.push_back(Pair("received", received));
 
@@ -906,7 +906,7 @@ UniValue getaddressbalance(const UniValue& params, bool fHelp)
 
 }
 
-UniValue getaddresstxids(const UniValue& params, bool fHelp)
+Object getaddresstxids(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error(
@@ -941,8 +941,8 @@ UniValue getaddresstxids(const UniValue& params, bool fHelp)
     int start = 0;
     int end = 0;
     if (params[0].isObject()) {
-        UniValue startValue = find_value(params[0].get_obj(), "start");
-        UniValue endValue = find_value(params[0].get_obj(), "end");
+        Object startValue = find_value(params[0].get_obj(), "start");
+        Object endValue = find_value(params[0].get_obj(), "end");
         if (startValue.isNum() && endValue.isNum()) {
             start = startValue.get_int();
             end = endValue.get_int();
@@ -964,7 +964,7 @@ UniValue getaddresstxids(const UniValue& params, bool fHelp)
     }
 
     std::set<std::pair<int, std::string> > txids;
-    UniValue result(UniValue::VARR);
+    Array result;
 
     for (std::vector<std::pair<CAddressIndexKey, CAmount> >::const_iterator it=addressIndex.begin(); it!=addressIndex.end(); it++) {
         int height = it->first.blockHeight;
@@ -989,7 +989,7 @@ UniValue getaddresstxids(const UniValue& params, bool fHelp)
 
 }
 
-UniValue getspentinfo(const UniValue& params, bool fHelp)
+Object getspentinfo(const Array& params, bool fHelp)
 {
 
     if (fHelp || params.size() != 1 || !params[0].isObject())
@@ -1012,8 +1012,8 @@ UniValue getspentinfo(const UniValue& params, bool fHelp)
             + HelpExampleRpc("getspentinfo", "{\"txid\": \"0437cd7f8525ceed2324359c2d0ba26006d92d856a9c20fa0241106ee5a597c9\", \"index\": 0}")
         );
 
-    UniValue txidValue = find_value(params[0].get_obj(), "txid");
-    UniValue indexValue = find_value(params[0].get_obj(), "index");
+    Object txidValue = find_value(params[0].get_obj(), "txid");
+    Object indexValue = find_value(params[0].get_obj(), "index");
 
     if (!txidValue.isStr() || !indexValue.isNum()) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid txid or index");
@@ -1029,7 +1029,7 @@ UniValue getspentinfo(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unable to get spent info");
     }
 
-    UniValue obj(UniValue::VOBJ);
+    Object obj;
     obj.push_back(Pair("txid", value.txid.GetHex()));
     obj.push_back(Pair("index", (int)value.inputIndex));
     obj.push_back(Pair("height", value.blockHeight));

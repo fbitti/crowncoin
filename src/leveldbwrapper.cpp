@@ -88,7 +88,7 @@ bool CLevelDBWrapper::WriteBatch(CLevelDBBatch& batch, bool fSync) throw(leveldb
     return true;
 }
 
-CDBIterator::~CDBIterator() { delete piter; }
-bool CDBIterator::Valid() { return piter->Valid(); }
-void CDBIterator::SeekToFirst() { piter->SeekToFirst(); }
-void CDBIterator::Next() { piter->Next(); }
+//CDBIterator::~CDBIterator() { delete piter; }
+//bool CDBIterator::Valid() { return piter->Valid(); }
+//void CDBIterator::SeekToFirst() { piter->SeekToFirst(); }
+//void CDBIterator::Next() { piter->Next(); }

@@ -154,6 +154,12 @@ extern CBlockIndex *pindexBestHeader;
 /** Minimum disk space required - used in CheckDiskSpace() */
 static const uint64_t nMinDiskSpace = 52428800;
 
+/** Pruning-related variables and constants */
+/** True if any block files have ever been pruned. */
+extern bool fHavePruned;
+/** True if we're running in -prune mode. */
+extern bool fPruneMode;
+
 /** Register a wallet to receive updates from core */
 void RegisterValidationInterface(CValidationInterface* pwalletIn);
 /** Unregister a wallet from core */

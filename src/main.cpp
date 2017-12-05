@@ -2159,10 +2159,10 @@ bool DisconnectBlock(CBlock& block, CValidationState& state, CBlockIndex* pindex
     } else {
         if (fAddressIndex) {
             if (!pblocktree->EraseAddressIndex(addressIndex)) {
-                return AbortNode(state, "Failed to delete address index");
+                return AbortNode(state.GetRejectReason(), "Failed to delete address index");
             }
             if (!pblocktree->UpdateAddressUnspentIndex(addressUnspentIndex)) {
-                return AbortNode(state, "Failed to write address unspent index");
+                return AbortNode(state.GetRejectReason(), "Failed to write address unspent index");
             }
         }
         return fClean;
@@ -2401,17 +2401,17 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     if (fAddressIndex) {
         if (!pblocktree->WriteAddressIndex(addressIndex)) {
-            return AbortNode(state, "Failed to write address index");
+            return AbortNode(state.GetRejectReason(), "Failed to write address index");
         }
 
         if (!pblocktree->UpdateAddressUnspentIndex(addressUnspentIndex)) {
-            return AbortNode(state, "Failed to write address unspent index");
+            return AbortNode(state.GetRejectReason(), "Failed to write address unspent index");
         }
     }
 
     if (fSpentIndex)
         if (!pblocktree->UpdateSpentIndex(spentIndex))
-            return AbortNode(state, "Failed to write transaction index");
+            return AbortNode(state.GetRejectReason(), "Failed to write transaction index");
 
     if (fTimestampIndex) {
         unsigned int logicalTS = pindex->nTime;
@@ -2428,10 +2428,10 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         }
 
         if (!pblocktree->WriteTimestampIndex(CTimestampIndexKey(logicalTS, pindex->GetBlockHash())))
-            return AbortNode(state, "Failed to write timestamp index");
+            return AbortNode(state.GetRejectReason(), "Failed to write timestamp index");
 
         if (!pblocktree->WriteTimestampBlockIndex(CTimestampBlockIndexKey(pindex->GetBlockHash()), CTimestampBlockIndexValue(logicalTS)))
-            return AbortNode(state, "Failed to write blockhash index");
+            return AbortNode(state.GetRejectReason(), "Failed to write blockhash index");
     }
 
     // add this block to the view's block chain
