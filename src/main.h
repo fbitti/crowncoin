@@ -279,11 +279,11 @@ struct CTimestampIndexIteratorKey {
     }
     template<typename Stream>
     void Serialize(Stream& s, int nType, int nVersion) const {
-        //ser_writedata32be(s, timestamp);
+        ser_writedata32be(s, timestamp);
     }
     template<typename Stream>
     void Unserialize(Stream& s, int nType, int nVersion) {
-        //timestamp = ser_readdata32be(s);
+        timestamp = ser_readdata32be(s);
     }
 
     CTimestampIndexIteratorKey(unsigned int time) {
@@ -308,12 +308,12 @@ struct CTimestampIndexKey {
     }
     template<typename Stream>
     void Serialize(Stream& s, int nType, int nVersion) const {
-        //ser_writedata32be(s, timestamp);
+        ser_writedata32be(s, timestamp);
         blockHash.Serialize(s, nType, nVersion);
     }
     template<typename Stream>
     void Unserialize(Stream& s, int nType, int nVersion) {
-        //timestamp = ser_readdata32be(s);
+        timestamp = ser_readdata32be(s);
         blockHash.Unserialize(s, nType, nVersion);
     }
 
@@ -370,12 +370,12 @@ struct CTimestampBlockIndexValue {
 
     template<typename Stream>
     void Serialize(Stream& s, int nType, int nVersion) const {
-        //ser_writedata32be(s, ltimestamp);
+        ser_writedata32be(s, ltimestamp);
     }
 
     template<typename Stream>
     void Unserialize(Stream& s, int nType, int nVersion) {
-        //ltimestamp = ser_readdata32be(s);
+        ltimestamp = ser_readdata32be(s);
     }
 
     CTimestampBlockIndexValue (unsigned int time) {
@@ -402,10 +402,10 @@ struct CAddressUnspentKey {
     }
     template<typename Stream>
     void Serialize(Stream& s, int nType, int nVersion) const {
-        //ser_writedata8(s, type);
+        ser_writedata8(s, type);
         hashBytes.Serialize(s, nType, nVersion);
         txhash.Serialize(s, nType, nVersion);
-        //ser_writedata32(s, index);
+        ser_writedata32(s, index);
     }
     template<typename Stream>
     void Unserialize(Stream& s, int nType, int nVersion) {
@@ -483,22 +483,22 @@ struct CAddressIndexKey {
     }
     template<typename Stream>
     void Serialize(Stream& s, int nType, int nVersion) const {
-        //ser_writedata8(s, type);
+        ser_writedata8(s, type);
         hashBytes.Serialize(s, nType, nVersion);
         // Heights are stored big-endian for key sorting in LevelDB
-        //ser_writedata32be(s, blockHeight);
-        //ser_writedata32be(s, txindex);
+        ser_writedata32be(s, blockHeight);
+        ser_writedata32be(s, txindex);
         txhash.Serialize(s, nType, nVersion);
-        //ser_writedata32(s, index);
+        ser_writedata32(s, index);
         char f = spending;
-        //ser_writedata8(s, f);
+        ser_writedata8(s, f);
     }
     template<typename Stream>
     void Unserialize(Stream& s, int nType, int nVersion) {
         type = ser_readdata8(s);
         hashBytes.Unserialize(s, nType, nVersion);
-        //blockHeight = ser_readdata32be(s);
-        //txindex = ser_readdata32be(s);
+        blockHeight = ser_readdata32be(s);
+        txindex = ser_readdata32be(s);
         txhash.Unserialize(s, nType, nVersion);
         index = ser_readdata32(s);
         char f = ser_readdata8(s);
@@ -541,7 +541,7 @@ struct CAddressIndexIteratorKey {
     }
     template<typename Stream>
     void Serialize(Stream& s, int nType, int nVersion) const {
-        //ser_writedata8(s, type);
+        ser_writedata8(s, type);
         hashBytes.Serialize(s, nType, nVersion);
     }
     template<typename Stream>
@@ -575,15 +575,15 @@ struct CAddressIndexIteratorHeightKey {
     }
     template<typename Stream>
     void Serialize(Stream& s, int nType, int nVersion) const {
-        //ser_writedata8(s, type);
+        ser_writedata8(s, type);
         hashBytes.Serialize(s, nType, nVersion);
-        //ser_writedata32be(s, blockHeight);
+        ser_writedata32be(s, blockHeight);
     }
     template<typename Stream>
     void Unserialize(Stream& s, int nType, int nVersion) {
         type = ser_readdata8(s);
         hashBytes.Unserialize(s, nType, nVersion);
-        //blockHeight = ser_readdata32be(s);
+        blockHeight = ser_readdata32be(s);
     }
 
     CAddressIndexIteratorHeightKey(unsigned int addressType, uint160 addressHash, int height) {
