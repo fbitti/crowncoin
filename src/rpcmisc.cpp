@@ -524,36 +524,35 @@ bool getAddressFromIndex(const int &type, const uint160 &hash, std::string &addr
 
 bool getAddressesFromParams(const Array& params, std::vector<std::pair<uint160, int> > &addresses)
 {
-    //if (params[0].isStr()) {
-    //    CBitcoinAddress address(params[0].get_str());
-    //    uint160 hashBytes;
-    //    int type = 0;
-    //    if (!address.GetIndexKey(hashBytes, type)) {
-    //        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
-    //    }
-    //    addresses.push_back(std::make_pair(hashBytes, type));
-    //} else if (params[0].isObject()) {
+    if (params[0].type() == array_type) {
+        CBitcoinAddress address(params[0].get_str());
+        uint160 hashBytes;
+        int type = 0;
+        if (!address.GetIndexKey(hashBytes, type)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+        }
+        addresses.push_back(std::make_pair(hashBytes, type));
+    } else if (params[0].type() == obj_type) {
 
-    //    Object addressValues = find_value(params[0].get_obj(), "addresses");
-    //    if (!addressValues.isArray()) {
-    //        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Addresses is expected to be an array");
-    //    }
+        Value addressValues = find_value(params[0].get_obj(), "addresses");
+        if (addressValues.type() != array_type) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Addresses is expected to be an array");
+        }
 
-    //    std::vector<Object> values = addressValues.getValues();
-
-    //    for (std::vector<Object>::iterator it = values.begin(); it != values.end(); ++it) {
-
-    //        CBitcoinAddress address(it->get_str());
-    //        uint160 hashBytes;
-    //        int type = 0;
-    //        if (!address.GetIndexKey(hashBytes, type)) {
-    //            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
-    //        }
-    //        addresses.push_back(std::make_pair(hashBytes, type));
-    //    }
-    //} else {
-    //    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
-    //}
+        Array values = addressValues.get_array();
+        BOOST_FOREACH(Value& v, values)
+        {
+            CBitcoinAddress address(v.get_str());
+            uint160 hashBytes;
+            int type = 0;
+            if (!address.GetIndexKey(hashBytes, type)) {
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+            }
+            addresses.push_back(std::make_pair(hashBytes, type));
+        }
+    } else {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+    }
 
     return true;
 }
@@ -671,12 +670,13 @@ json_spirit::Value getaddressutxos(const Array& params, bool fHelp)
             );
 
     bool includeChainInfo = false;
-    //if (params[0].isObject()) {
-    //    Object chainInfo = find_value(params[0].get_obj(), "chainInfo");
-    //    if (chainInfo.isBool()) {
-    //        includeChainInfo = chainInfo.get_bool();
-    //    }
-    //}
+    if (params[0].type() == obj_type) {
+        Value chainInfo = find_value(params[0].get_obj(), "chainInfo");
+        if (chainInfo.type() == bool_type)
+        {
+            includeChainInfo = chainInfo.get_bool();
+        }
+    }
 
     std::vector<std::pair<uint160, int> > addresses;
 
@@ -727,127 +727,127 @@ json_spirit::Value getaddressutxos(const Array& params, bool fHelp)
 
 json_spirit::Value getaddressdeltas(const Array& params, bool fHelp)
 {
-    //if (fHelp || params.size() != 1 || !params[0].isObject())
-    //    throw runtime_error(
-    //        "getaddressdeltas\n"
-    //        "\nReturns all changes for an address (requires addressindex to be enabled).\n"
-    //        "\nArguments:\n"
-    //        "{\n"
-    //        "  \"addresses\"\n"
-    //        "    [\n"
-    //        "      \"address\"  (string) The base58check encoded address\n"
-    //        "      ,...\n"
-    //        "    ]\n"
-    //        "  \"start\" (number) The start block height\n"
-    //        "  \"end\" (number) The end block height\n"
-    //        "  \"chainInfo\" (boolean) Include chain info in results, only applies if start and end specified\n"
-    //        "}\n"
-    //        "\nResult:\n"
-    //        "[\n"
-    //        "  {\n"
-    //        "    \"satoshis\"  (number) The difference of satoshis\n"
-    //        "    \"txid\"  (string) The related txid\n"
-    //        "    \"index\"  (number) The related input or output index\n"
-    //        "    \"height\"  (number) The block height\n"
-    //        "    \"address\"  (string) The base58check encoded address\n"
-    //        "  }\n"
-    //        "]\n"
-    //        "\nExamples:\n"
-    //        + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}'")
-    //        + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}")
-    //    );
+    if (fHelp || params.size() != 1 || !params[0].type() == obj_type)
+        throw runtime_error(
+            "getaddressdeltas\n"
+            "\nReturns all changes for an address (requires addressindex to be enabled).\n"
+            "\nArguments:\n"
+            "{\n"
+            "  \"addresses\"\n"
+            "    [\n"
+            "      \"address\"  (string) The base58check encoded address\n"
+            "      ,...\n"
+            "    ]\n"
+            "  \"start\" (number) The start block height\n"
+            "  \"end\" (number) The end block height\n"
+            "  \"chainInfo\" (boolean) Include chain info in results, only applies if start and end specified\n"
+            "}\n"
+            "\nResult:\n"
+            "[\n"
+            "  {\n"
+            "    \"satoshis\"  (number) The difference of satoshis\n"
+            "    \"txid\"  (string) The related txid\n"
+            "    \"index\"  (number) The related input or output index\n"
+            "    \"height\"  (number) The block height\n"
+            "    \"address\"  (string) The base58check encoded address\n"
+            "  }\n"
+            "]\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}'")
+            + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}")
+        );
 
 
-    //Object startValue = find_value(params[0].get_obj(), "start");
-    //Object endValue = find_value(params[0].get_obj(), "end");
+    Value startValue = find_value(params[0].get_obj(), "start");
+    Value endValue = find_value(params[0].get_obj(), "end");
 
-    //Object chainInfo = find_value(params[0].get_obj(), "chainInfo");
-    //bool includeChainInfo = false;
-    //if (chainInfo.isBool()) {
-    //    includeChainInfo = chainInfo.get_bool();
-    //}
+    Value chainInfo = find_value(params[0].get_obj(), "chainInfo");
+    bool includeChainInfo = false;
+    if (chainInfo.type() == bool_type) {
+        includeChainInfo = chainInfo.get_bool();
+    }
 
-    //int start = 0;
-    //int end = 0;
+    int start = 0;
+    int end = 0;
 
-    //if (startValue.isNum() && endValue.isNum()) {
-    //    start = startValue.get_int();
-    //    end = endValue.get_int();
-    //    if (start <= 0 || end <= 0) {
-    //        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Start and end is expected to be greater than zero");
-    //    }
-    //    if (end < start) {
-    //        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "End value is expected to be greater than start");
-    //    }
-    //}
+    if (startValue.type() == int_type && endValue.type() == int_type) {
+        start = startValue.get_int();
+        end = endValue.get_int();
+        if (start <= 0 || end <= 0) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Start and end is expected to be greater than zero");
+        }
+        if (end < start) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "End value is expected to be greater than start");
+        }
+    }
 
-    //std::vector<std::pair<uint160, int> > addresses;
+    std::vector<std::pair<uint160, int> > addresses;
 
-    //if (!getAddressesFromParams(params, addresses)) {
-    //    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
-    //}
+    if (!getAddressesFromParams(params, addresses)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+    }
 
-    //std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
+    std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
 
-    //for (std::vector<std::pair<uint160, int> >::iterator it = addresses.begin(); it != addresses.end(); it++) {
-    //    if (start > 0 && end > 0) {
-    //        if (!GetAddressIndex((*it).first, (*it).second, addressIndex, start, end)) {
-    //            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
-    //        }
-    //    } else {
-    //        if (!GetAddressIndex((*it).first, (*it).second, addressIndex)) {
-    //            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
-    //        }
-    //    }
-    //}
+    for (std::vector<std::pair<uint160, int> >::iterator it = addresses.begin(); it != addresses.end(); it++) {
+        if (start > 0 && end > 0) {
+            if (!GetAddressIndex((*it).first, (*it).second, addressIndex, start, end)) {
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+            }
+        } else {
+            if (!GetAddressIndex((*it).first, (*it).second, addressIndex)) {
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+            }
+        }
+    }
 
-    //Array deltas;
+    Array deltas;
 
-    //for (std::vector<std::pair<CAddressIndexKey, CAmount> >::const_iterator it=addressIndex.begin(); it!=addressIndex.end(); it++) {
-    //    std::string address;
-    //    if (!getAddressFromIndex(it->first.type, it->first.hashBytes, address)) {
-    //        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unknown address type");
-    //    }
+    for (std::vector<std::pair<CAddressIndexKey, CAmount> >::const_iterator it=addressIndex.begin(); it!=addressIndex.end(); it++) {
+        std::string address;
+        if (!getAddressFromIndex(it->first.type, it->first.hashBytes, address)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unknown address type");
+        }
 
-    //    Object delta;
-    //    delta.push_back(Pair("satoshis", it->second));
-    //    delta.push_back(Pair("txid", it->first.txhash.GetHex()));
-    //    delta.push_back(Pair("index", (int)it->first.index));
-    //    delta.push_back(Pair("blockindex", (int)it->first.txindex));
-    //    delta.push_back(Pair("height", it->first.blockHeight));
-    //    delta.push_back(Pair("address", address));
-    //    deltas.push_back(delta);
-    //}
+        Object delta;
+        delta.push_back(Pair("satoshis", it->second));
+        delta.push_back(Pair("txid", it->first.txhash.GetHex()));
+        delta.push_back(Pair("index", (int)it->first.index));
+        delta.push_back(Pair("blockindex", (int)it->first.txindex));
+        delta.push_back(Pair("height", it->first.blockHeight));
+        delta.push_back(Pair("address", address));
+        deltas.push_back(delta);
+    }
 
-    //Object result;
+    Object result;
 
-    //if (includeChainInfo && start > 0 && end > 0) {
-    //    LOCK(cs_main);
+    if (includeChainInfo && start > 0 && end > 0) {
+        LOCK(cs_main);
 
-    //    if (start > chainActive.Height() || end > chainActive.Height()) {
-    //        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Start or end is outside chain range");
-    //    }
+        if (start > chainActive.Height() || end > chainActive.Height()) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Start or end is outside chain range");
+        }
 
-    //    CBlockIndex* startIndex = chainActive[start];
-    //    CBlockIndex* endIndex = chainActive[end];
+        CBlockIndex* startIndex = chainActive[start];
+        CBlockIndex* endIndex = chainActive[end];
 
-    //    Object startInfo;
-    //    Object endInfo;
+        Object startInfo;
+        Object endInfo;
 
-    //    startInfo.push_back(Pair("hash", startIndex->GetBlockHash().GetHex()));
-    //    startInfo.push_back(Pair("height", start));
+        startInfo.push_back(Pair("hash", startIndex->GetBlockHash().GetHex()));
+        startInfo.push_back(Pair("height", start));
 
-    //    endInfo.push_back(Pair("hash", endIndex->GetBlockHash().GetHex()));
-    //    endInfo.push_back(Pair("height", end));
+        endInfo.push_back(Pair("hash", endIndex->GetBlockHash().GetHex()));
+        endInfo.push_back(Pair("height", end));
 
-    //    result.push_back(Pair("deltas", deltas));
-    //    result.push_back(Pair("start", startInfo));
-    //    result.push_back(Pair("end", endInfo));
+        result.push_back(Pair("deltas", deltas));
+        result.push_back(Pair("start", startInfo));
+        result.push_back(Pair("end", endInfo));
 
-    //    return result;
-    //} else {
-    //    return deltas;
-    //}
+        return result;
+    } else {
+        return deltas;
+    }
 }
 
 Value getaddressbalance(const Array& params, bool fHelp)
@@ -940,14 +940,14 @@ Value getaddresstxids(const Array& params, bool fHelp)
 
     int start = 0;
     int end = 0;
-    //if (params[0].isObject()) {
-    //    Object startValue = find_value(params[0].get_obj(), "start");
-    //    Object endValue = find_value(params[0].get_obj(), "end");
-    //    if (startValue.isNum() && endValue.isNum()) {
-    //        start = startValue.get_int();
-    //        end = endValue.get_int();
-    //    }
-    //}
+    if (params[0].type() == obj_type) {
+        Value startValue = find_value(params[0].get_obj(), "start");
+        Value endValue = find_value(params[0].get_obj(), "end");
+        if (startValue.type() == int_type && endValue.type() == int_type) {
+            start = startValue.get_int();
+            end = endValue.get_int();
+        }
+    }
 
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
 
@@ -992,47 +992,47 @@ Value getaddresstxids(const Array& params, bool fHelp)
 Value getspentinfo(const Array& params, bool fHelp)
 {
 
-    //if (fHelp || params.size() != 1 || !params[0].isObject())
-    //    throw runtime_error(
-    //        "getspentinfo\n"
-    //        "\nReturns the txid and index where an output is spent.\n"
-    //        "\nArguments:\n"
-    //        "{\n"
-    //        "  \"txid\" (string) The hex string of the txid\n"
-    //        "  \"index\" (number) The start block height\n"
-    //        "}\n"
-    //        "\nResult:\n"
-    //        "{\n"
-    //        "  \"txid\"  (string) The transaction id\n"
-    //        "  \"index\"  (number) The spending input index\n"
-    //        "  ,...\n"
-    //        "}\n"
-    //        "\nExamples:\n"
-    //        + HelpExampleCli("getspentinfo", "'{\"txid\": \"0437cd7f8525ceed2324359c2d0ba26006d92d856a9c20fa0241106ee5a597c9\", \"index\": 0}'")
-    //        + HelpExampleRpc("getspentinfo", "{\"txid\": \"0437cd7f8525ceed2324359c2d0ba26006d92d856a9c20fa0241106ee5a597c9\", \"index\": 0}")
-    //    );
+    if (fHelp || params.size() != 1 || params[0].type() != obj_type)
+        throw runtime_error(
+            "getspentinfo\n"
+            "\nReturns the txid and index where an output is spent.\n"
+            "\nArguments:\n"
+            "{\n"
+            "  \"txid\" (string) The hex string of the txid\n"
+            "  \"index\" (number) The start block height\n"
+            "}\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"txid\"  (string) The transaction id\n"
+            "  \"index\"  (number) The spending input index\n"
+            "  ,...\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getspentinfo", "'{\"txid\": \"0437cd7f8525ceed2324359c2d0ba26006d92d856a9c20fa0241106ee5a597c9\", \"index\": 0}'")
+            + HelpExampleRpc("getspentinfo", "{\"txid\": \"0437cd7f8525ceed2324359c2d0ba26006d92d856a9c20fa0241106ee5a597c9\", \"index\": 0}")
+        );
 
-    //Object txidValue = find_value(params[0].get_obj(), "txid");
-    //Object indexValue = find_value(params[0].get_obj(), "index");
+    Value txidValue = find_value(params[0].get_obj(), "txid");
+    Value indexValue = find_value(params[0].get_obj(), "index");
 
-    //if (!txidValue.isStr() || !indexValue.isNum()) {
-    //    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid txid or index");
-    //}
+    if (txidValue.type() != str_type || indexValue.type() != int_type) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid txid or index");
+    }
 
-    //uint256 txid = ParseHashV(txidValue, "txid");
-    //int outputIndex = indexValue.get_int();
+    uint256 txid = ParseHashV(txidValue, "txid");
+    int outputIndex = indexValue.get_int();
 
-    //CSpentIndexKey key(txid, outputIndex);
-    //CSpentIndexValue value;
+    CSpentIndexKey key(txid, outputIndex);
+    CSpentIndexValue value;
 
-    //if (!GetSpentIndex(key, value)) {
-    //    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unable to get spent info");
-    //}
+    if (!GetSpentIndex(key, value)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unable to get spent info");
+    }
 
-    //Object obj;
-    //obj.push_back(Pair("txid", value.txid.GetHex()));
-    //obj.push_back(Pair("index", (int)value.inputIndex));
-    //obj.push_back(Pair("height", value.blockHeight));
+    Object obj;
+    obj.push_back(Pair("txid", value.txid.GetHex()));
+    obj.push_back(Pair("index", (int)value.inputIndex));
+    obj.push_back(Pair("height", value.blockHeight));
 
-    //return obj;
+    return obj;
 }

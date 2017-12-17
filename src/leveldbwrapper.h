@@ -228,6 +228,12 @@ public:
     {
         return pdb->NewIterator(iteroptions);
     }
+
+    CLevelDBIterator *NewDBIterator()
+    {
+        return new CLevelDBIterator(pdb->NewIterator(iteroptions));
+    }
+
 };
 
 #endif // BITCOIN_LEVELDBWRAPPER_H
