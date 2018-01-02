@@ -65,9 +65,9 @@ endif
 
 if BUILD_BITCOIN_UTILS
   bin_PROGRAMS += crown-cli crown-tx
-	if ENABLE_WALLET
-	  bin_PROGRAMS += wallet-utility
-	endif
+if ENABLE_WALLET
+  bin_PROGRAMS += wallet-utility
+endif
 endif
 
 .PHONY: FORCE
