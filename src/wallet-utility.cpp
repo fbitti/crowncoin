@@ -2,10 +2,10 @@
 #include <string>
 
 // Include local headers
-#include "wallet/walletdb.h"
+#include "walletdb.h"
 #include "util.h"
 #include "base58.h"
-#include "wallet/crypter.h"
+#include "crypter.h"
 #include <boost/foreach.hpp>
 
 
@@ -39,7 +39,7 @@ class WalletUtilityDB : public CDB
         std::vector<CKeyingMaterial> vMKeys;
 
     public:
-        WalletUtilityDB(const std::string& strFilename, const char* pszMode = "r+", bool fFlushOnClose = true) : CDB(strFilename, pszMode, fFlushOnClose)
+        WalletUtilityDB(const std::string& strFilename, const char* pszMode = "r+") : CDB(strFilename, pszMode)
     {
         nMasterKeyMaxID = 0;
         mPass.reserve(100);
