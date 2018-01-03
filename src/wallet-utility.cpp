@@ -324,7 +324,7 @@ int main(int argc, char* argv[])
     }
 
     try {
-        SelectParams(ChainNameFromCommandLine());
+        SelectParams(NetworkIdFromCommandLine());
         result = WalletUtilityDB(walletFile, "r").parseKeys(fDumpPass, masterPass);
     }
     catch (const std::exception& e) {
