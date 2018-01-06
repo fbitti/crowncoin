@@ -229,6 +229,76 @@ Value setgenerate(const Array& params, bool fHelp)
     return Value::null;
 }
 
+Value generate(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 1 || params.size() > 1)
+        throw runtime_error(
+            "generate numblocks\n"
+            "\nMine blocks immediately (before the RPC call returns)\n"
+            "\nNote: this function can only be used on the regtest network\n"
+            "\nArguments:\n"
+            "1. numblocks    (numeric, required) How many blocks are generated immediately.\n"
+            "\nResult\n"
+            "[ blockhashes ]     (array) hashes of blocks generated\n"
+            "\nExamples:\n"
+            "\nGenerate 11 blocks\n"
+            + HelpExampleCli("generate", "11")
+        );
+
+    if (!Params().MineBlocksOnDemand())
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, "This method can only be used on regtest");
+
+    int nHeightStart = 0;
+    int nHeightEnd = 0;
+    int nHeight = 0;
+    int nGenerate = params[0].get_int();
+
+    boost::shared_ptr<CReserveScript> coinbaseScript;
+    //GetMainSignals().ScriptForMining(coinbaseScript);
+
+    // If the keypool is exhausted, no script is returned at all.  Catch this.
+    if (!coinbaseScript)
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
+    //throw an error if no script was provided
+    if (coinbaseScript->reserveScript.empty())
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "No coinbase script available (mining requires a wallet)");
+
+    {   // Don't keep cs_main locked
+        LOCK(cs_main);
+        nHeightStart = chainActive.Height();
+        nHeight = nHeightStart;
+        nHeightEnd = nHeightStart+nGenerate;
+    }
+    unsigned int nExtraNonce = 0;
+    Array blockHashes;
+    while (nHeight < nHeightEnd)
+    {
+        auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(coinbaseScript->reserveScript));
+        if (!pblocktemplate.get())
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
+        CBlock *pblock = &pblocktemplate->block;
+        {
+            LOCK(cs_main);
+            IncrementExtraNonce(pblock, chainActive.Tip(), nExtraNonce);
+        }
+        //while (!CheckProofOfWork(pblock->GetHash(), pblock->nBits, Params().GetConsensus())) {
+        //    // Yes, there is a chance every nonce could fail to satisfy the -regtest
+        //    // target -- 1 in 2^(2^32). That ain't gonna happen.
+        //    ++pblock->nNonce;
+        //}
+        CValidationState state;
+        //if (!ProcessNewBlock(state, Params(), NULL, pblock, true, NULL))
+        //    throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
+        ++nHeight;
+        blockHashes.push_back(pblock->GetHash().GetHex());
+
+        //mark script as important because it was used at least for one coinbase output
+        coinbaseScript->KeepScript();
+    }
+    return blockHashes;
+}
+
 Value gethashespersec(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)

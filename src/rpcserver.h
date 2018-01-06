@@ -159,6 +159,7 @@ extern json_spirit::Value dumpwallet(const json_spirit::Array& params, bool fHel
 extern json_spirit::Value importwallet(const json_spirit::Array& params, bool fHelp);
 
 extern json_spirit::Value getgenerate(const json_spirit::Array& params, bool fHelp); // in rpcmining.cpp
+extern json_spirit::Value generate(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value setgenerate(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getnetworkhashps(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value gethashespersec(const json_spirit::Array& params, bool fHelp);
