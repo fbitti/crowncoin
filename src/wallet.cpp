@@ -2278,6 +2278,17 @@ void CWallet::GetAllReserveKeys(set<CKeyID>& setAddress) const
     }
 }
 
+void CWallet::GetScriptForMining(boost::shared_ptr<CReserveScript> &script)
+{
+    boost::shared_ptr<CReserveKey> rKey(new CReserveKey(this));
+    CPubKey pubkey;
+    if (!rKey->GetReservedKey(pubkey))
+        return;
+
+    script = rKey;
+    script->reserveScript = CScript() << ToByteVector(pubkey) << OP_CHECKSIG;
+}
+
 bool CWallet::UpdatedTransaction(const uint256 &hashTx)
 {
     {

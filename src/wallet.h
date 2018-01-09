@@ -427,6 +427,7 @@ public:
                 (*mi).second++;
         }
     }
+    void GetScriptForMining(boost::shared_ptr<CReserveScript> &script);
 
     unsigned int GetKeyPoolSize()
     {
@@ -472,7 +473,7 @@ public:
 };
 
 /** A key allocated from the key pool. */
-class CReserveKey
+class CReserveKey : public CReserveScript
 {
 protected:
     CWallet* pwallet;
