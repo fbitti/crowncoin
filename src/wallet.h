@@ -19,6 +19,7 @@
 #include "util.h"
 #include "wallet_ismine.h"
 #include "walletdb.h"
+#include "validationinterface.h"
 
 #include <algorithm>
 #include <map>

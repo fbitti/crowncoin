@@ -254,7 +254,7 @@ Value generate(const Array& params, bool fHelp)
     int nGenerate = params[0].get_int();
 
     boost::shared_ptr<CReserveScript> coinbaseScript;
-    //GetMainSignals().ScriptForMining(coinbaseScript);
+    GetMainSignals().ScriptForMining(coinbaseScript);
 
     // If the keypool is exhausted, no script is returned at all.  Catch this.
     if (!coinbaseScript)
@@ -282,14 +282,14 @@ Value generate(const Array& params, bool fHelp)
             LOCK(cs_main);
             IncrementExtraNonce(pblock, chainActive.Tip(), nExtraNonce);
         }
-        //while (!CheckProofOfWork(pblock->GetHash(), pblock->nBits, Params().GetConsensus())) {
-        //    // Yes, there is a chance every nonce could fail to satisfy the -regtest
-        //    // target -- 1 in 2^(2^32). That ain't gonna happen.
-        //    ++pblock->nNonce;
-        //}
+        while (!CheckProofOfWork(pblock->GetHash(), pblock->nBits)) {
+            // Yes, there is a chance every nonce could fail to satisfy the -regtest
+            // target -- 1 in 2^(2^32). That ain't gonna happen.
+            ++pblock->nNonce;
+        }
         CValidationState state;
-        //if (!ProcessNewBlock(state, Params(), NULL, pblock, true, NULL))
-        //    throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
+        if (!ProcessNewBlock(state, NULL, pblock, NULL))
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
         ++nHeight;
         blockHashes.push_back(pblock->GetHash().GetHex());
 

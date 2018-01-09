@@ -45,7 +45,7 @@ class CBlockTreeDB;
 class CBloomFilter;
 class CInv;
 class CScriptCheck;
-class CValidationInterface;
+//class CValidationInterface;
 class CValidationState;
 
 struct CBlockTemplate;
@@ -160,14 +160,14 @@ extern bool fHavePruned;
 /** True if we're running in -prune mode. */
 extern bool fPruneMode;
 
-/** Register a wallet to receive updates from core */
-void RegisterValidationInterface(CValidationInterface* pwalletIn);
-/** Unregister a wallet from core */
-void UnregisterValidationInterface(CValidationInterface* pwalletIn);
-/** Unregister all wallets from core */
-void UnregisterAllValidationInterfaces();
-/** Push an updated transaction to all registered wallets */
-void SyncWithWallets(const CTransaction& tx, const CBlock* pblock = NULL);
+///** Register a wallet to receive updates from core */
+//void RegisterValidationInterface(CValidationInterface* pwalletIn);
+///** Unregister a wallet from core */
+//void UnregisterValidationInterface(CValidationInterface* pwalletIn);
+///** Unregister all wallets from core */
+//void UnregisterAllValidationInterfaces();
+///** Push an updated transaction to all registered wallets */
+//void SyncWithWallets(const CTransaction& tx, const CBlock* pblock = NULL);
 
 /** Register with a network node to receive its signals */
 void RegisterNodeSignals(CNodeSignals& nodeSignals);
@@ -932,25 +932,6 @@ struct CBlockTemplate
     CBlock block;
     std::vector<CAmount> vTxFees;
     std::vector<int64_t> vTxSigOps;
-};
-
-
-
-
-
-
-class CValidationInterface {
-protected:
-    virtual void SyncTransaction(const CTransaction &tx, const CBlock *pblock) {};
-    virtual void EraseFromWallet(const uint256 &hash) {};
-    virtual void SetBestChain(const CBlockLocator &locator) {};
-    virtual bool UpdatedTransaction(const uint256 &hash) {return false;};
-    virtual void Inventory(const uint256 &hash) {};
-    virtual void ResendWalletTransactions() {};
-    virtual void BlockChecked(const CBlock&, const CValidationState&) {};
-    friend void ::RegisterValidationInterface(CValidationInterface*);
-    friend void ::UnregisterValidationInterface(CValidationInterface*);
-    friend void ::UnregisterAllValidationInterfaces();
 };
 
 #endif // BITCOIN_MAIN_H
