@@ -56,6 +56,10 @@
 #include <boost/thread.hpp>
 #include <openssl/crypto.h>
 
+#if ENABLE_ZMQ
+#include "zmq/zmqnotificationinterface.h"
+#endif
+
 using namespace boost;
 using namespace std;
 
@@ -65,6 +69,10 @@ int nWalletBackups = 10;
 #endif
 bool fFeeEstimatesInitialized = false;
 bool fRestartRequested = false;  // true: restart false: shutdown
+
+#if ENABLE_ZMQ
+static CZMQNotificationInterface* pzmqNotificationInterface = NULL;
+#endif
 
 #ifdef WIN32
 // Win32 LevelDB doesn't use filedescriptors, and the ones used for
@@ -211,6 +219,13 @@ void PrepareShutdown()
 #ifdef ENABLE_WALLET
     if (pwalletMain)
         bitdb.Flush(true);
+#endif
+#if ENABLE_ZMQ
+    if (pzmqNotificationInterface) {
+        UnregisterValidationInterface(pzmqNotificationInterface);
+        delete pzmqNotificationInterface;
+        pzmqNotificationInterface = NULL;
+    }
 #endif
 #ifndef WIN32
     boost::filesystem::remove(GetPidFile());
@@ -373,6 +388,14 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += "                           " + _("(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)") + "\n";
 #endif
 
+#if ENABLE_ZMQ
+    strUsage += "\n" + _("ZeroMQ notification options:") + "\n";
+    strUsage += "\n" + "  -zmqpubhashblock=<address> " + _("Enable publish hash block in <address>") + "\n";
+    strUsage += "\n" + "  -zmqpubhashtx=<address>    " + _("Enable publish hash transaction in <address>") + "\n";
+    strUsage += "\n" + "  -zmqpubrawblock=<address>  " + _("Enable publish raw block in <address>") + "\n";
+    strUsage += "\n" + "  -zmqpubrawtx=<address>     " + _("Enable publish raw transaction in <address>") + "\n";
+#endif
+
     strUsage += "\n" + _("Debugging/Testing options:") + "\n";
     if (GetBoolArg("-help-debug", false))
     {
@@ -388,7 +411,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += "  -debug=<category>      " + strprintf(_("Output debugging information (default: %u, supplying <category> is optional)"), 0) + "\n";
     strUsage += "                         " + _("If <category> is not supplied, output all debugging information.") + "\n";
     strUsage += "                         " + _("<category> can be:\n");
-    strUsage += "                           addrman, alert, bench, coindb, db, lock, rand, rpc, selectcoins, mempool, net,\n"; // Don't translate these and qt below
+    strUsage += "                           addrman, alert, bench, coindb, db, lock, rand, rpc, selectcoins, mempool, net, zmq,\n"; // Don't translate these and qt below
     strUsage += "                           crown (or specifically: instantx, masternode, mnpayments, mnbudget)"; // Don't translate these and qt below
     if (mode == HMM_BITCOIN_QT)
         strUsage += ", qt";
@@ -1123,6 +1146,14 @@ bool AppInit2(boost::thread_group& threadGroup)
 
     BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
         AddOneShot(strDest);
+
+#if ENABLE_ZMQ
+    pzmqNotificationInterface = CZMQNotificationInterface::CreateWithArguments(mapArgs);
+
+    if (pzmqNotificationInterface) {
+        RegisterValidationInterface(pzmqNotificationInterface);
+    }
+#endif
 
     // ********************************************************* Step 7: load block chain
 
