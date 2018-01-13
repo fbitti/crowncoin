@@ -390,10 +390,10 @@ std::string HelpMessage(HelpMessageMode mode)
 
 #if ENABLE_ZMQ
     strUsage += "\n" + _("ZeroMQ notification options:") + "\n";
-    strUsage += "\n" + "  -zmqpubhashblock=<address> " + _("Enable publish hash block in <address>") + "\n";
-    strUsage += "\n" + "  -zmqpubhashtx=<address>    " + _("Enable publish hash transaction in <address>") + "\n";
-    strUsage += "\n" + "  -zmqpubrawblock=<address>  " + _("Enable publish raw block in <address>") + "\n";
-    strUsage += "\n" + "  -zmqpubrawtx=<address>     " + _("Enable publish raw transaction in <address>") + "\n";
+    strUsage += "  -zmqpubhashblock=<address> " + _("Enable publish hash block in <address>") + "\n";
+    strUsage += "  -zmqpubhashtx=<address>    " + _("Enable publish hash transaction in <address>") + "\n";
+    strUsage += "  -zmqpubrawblock=<address>  " + _("Enable publish raw block in <address>") + "\n";
+    strUsage += "  -zmqpubrawtx=<address>     " + _("Enable publish raw transaction in <address>") + "\n";
 #endif
 
     strUsage += "\n" + _("Debugging/Testing options:") + "\n";
