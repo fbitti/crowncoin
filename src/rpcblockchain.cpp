@@ -360,8 +360,8 @@ json_spirit::Value getblockdeltas(const Array& params, bool fHelp)
     if (fHavePruned && !(pblockindex->nStatus & BLOCK_HAVE_DATA) && pblockindex->nTx > 0)
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Block not available (pruned data)");
 
-    //if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus()))
-    //    throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
+    if(!ReadBlockFromDisk(block, pblockindex))
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
 
     return blockToDeltasJSON(block, pblockindex);
 }
@@ -402,16 +402,16 @@ json_spirit::Value getblockhashes(const Array& params, bool fHelp)
     bool fLogicalTS = false;
 
     if (params.size() > 2) {
-        //if (params[2].isObject()) {
-        //    Object noOrphans = find_value(params[2].get_obj(), "noOrphans");
-        //    Object returnLogical = find_value(params[2].get_obj(), "logicalTimes");
+        if (params[2].type() == obj_type) {
+            Value noOrphans = find_value(params[2].get_obj(), "noOrphans");
+            Value returnLogical = find_value(params[2].get_obj(), "logicalTimes");
 
-        //    if (noOrphans.isBool())
-        //        fActiveOnly = noOrphans.get_bool();
+            if (noOrphans.type() == bool_type)
+                fActiveOnly = noOrphans.get_bool();
 
-        //    if (returnLogical.isBool())
-        //        fLogicalTS = returnLogical.get_bool();
-        //}
+            if (returnLogical.type() == bool_type)
+                fLogicalTS = returnLogical.get_bool();
+        }
     }
 
     std::vector<std::pair<uint256, unsigned int> > blockHashes;
