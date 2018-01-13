@@ -171,7 +171,7 @@ BITCOIN_CORE_H = \
   walletdb.h \
   wallet.h \
   wallet_ismine.h \
-	zmq/zmqabstractnotifier.h \
+  zmq/zmqabstractnotifier.h \
   zmq/zmqconfig.h\
   zmq/zmqnotificationinterface.h \
   zmq/zmqpublishnotifier.h
