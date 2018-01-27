@@ -2870,10 +2870,13 @@ bool ActivateBestChain(CValidationState &state, CBlock *pblock) {
     do {
         boost::this_thread::interruption_point();
 
+        const CBlockIndex *pindexFork;
         bool fInitialDownload;
         while(true) {
             TRY_LOCK(cs_main, lockMain);
             if(!lockMain) { MilliSleep(50); continue; }
+
+            CBlockIndex *pindexOldTip = chainActive.Tip();
 
             pindexMostWork = FindMostWorkChain();
 
@@ -2885,6 +2888,7 @@ bool ActivateBestChain(CValidationState &state, CBlock *pblock) {
                 return false;
 
             pindexNewTip = chainActive.Tip();
+            pindexFork = chainActive.FindFork(pindexOldTip);
             fInitialDownload = IsInitialBlockDownload();
             break;
         }
@@ -2892,6 +2896,19 @@ bool ActivateBestChain(CValidationState &state, CBlock *pblock) {
 
         // Notifications/callbacks that can run without cs_main
         if (!fInitialDownload) {
+            // Find the hashes of all blocks that weren't previously in the best chain.
+            std::vector<uint256> vHashes;
+            CBlockIndex *pindexToAnnounce = pindexNewTip;
+            while (pindexToAnnounce != pindexFork) {
+                vHashes.push_back(pindexToAnnounce->GetBlockHash());
+                pindexToAnnounce = pindexToAnnounce->pprev;
+                if (vHashes.size() == MAX_BLOCKS_TO_ANNOUNCE) {
+                    // Limit announcements in case of a huge reorganization.
+                    // Rely on the peer's synchronization mechanism in that case.
+                    break;
+                }
+            }
+
             uint256 hashNewTip = pindexNewTip->GetBlockHash();
             // Relay inventory, but don't relay old inventory during initial block download.
             int nBlockEstimate = Checkpoints::GetTotalBlocksEstimate();
@@ -2903,6 +2920,11 @@ bool ActivateBestChain(CValidationState &state, CBlock *pblock) {
             }
             // Notify external listeners about the new tip.
             uiInterface.NotifyBlockTip(hashNewTip);
+
+            // Notify external listeners about the new tip.
+            if (!vHashes.empty()) {
+                GetMainSignals().UpdatedBlockTip(pindexNewTip);
+            }
         }
     } while(pindexMostWork != chainActive.Tip());
     CheckBlockIndex();
