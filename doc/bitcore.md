@@ -28,3 +28,32 @@ In `src/rpcserver.cpp`, each element in `vRPCCommands` array has 2 additional bo
 For `src/test/dbwrapper_tests.cpp`, v0.10 doesn't have this file, so I also didn't create this file. But that may be incorrect.
 
 Note: v0.10 and v0.12 in this article mean the versions of Bitcoin Core, not Crown Core.
+
+Publish
+=======
+
+Build, then type:
+
+```bash
+strip src/crownd
+```
+
+Create a "crownd.tar.gz" file containing this "crownd" by typing:
+
+```bash
+tar -cvzf crownd.tar.gz -C src crownd
+```
+
+Create a Git tag "bitcore-bin-<xxx>" where <xxx> is a 3-digit number:
+
+```bash
+git tag bitcore-bin-<xxx>
+```
+
+Then type:
+
+```bash
+git push --tags
+```
+
+In github.com, Upload crownd.tar.gz to the assets of this tag (release).

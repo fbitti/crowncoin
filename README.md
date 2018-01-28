@@ -1,3 +1,5 @@
+This is a bitcore-specific Crown Core. For details see "doc/bitcore.md".
+
 Crown Core staging tree 0.12
 ===============================
 
@@ -50,7 +52,7 @@ or emailing support@crown.tech
 ******************************************
 **Procedures for bounty development**
 *****************************************
-The Crown team will  post a request for development and the requirements to receive the bounty reward and the size of the reward. 
+The Crown team will  post a request for development and the requirements to receive the bounty reward and the size of the reward.
 1.Developers at large can then post their interest in seeking the bounty on github and being developing on the change.
 2. Once the at-large developer deems his code complete, they will submit a pull request via ionomy github with the label of the Bounty Feature.
 3. It will then be reviewed and tested by the internal development team at ionomy.com.
