@@ -32,7 +32,25 @@ Note: v0.10 and v0.12 in this article mean the versions of Bitcoin Core, not Cro
 Publish
 =======
 
-Build, then type:
+First, build "depends":
+
+```bash
+cd depends && make && cd ..
+```
+
+Then build Crown Core. Please note that while typing "./configure", it must be in the form of:
+
+```
+./configure --disable-tests --prefix=<depends-absolute-path>
+```
+
+`<depends-absolute-path>` must be an absolute path where the "depends" binaries are just made, for example:
+
+```
+/home/zzz/projects/crowncoin/depends/x86_64-unknown-linux-gnu/
+```
+
+After building Crown Core, type:
 
 ```bash
 strip src/crownd
