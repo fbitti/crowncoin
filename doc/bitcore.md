@@ -62,7 +62,7 @@ Create a "crownd.tar.gz" file containing this "crownd" by typing:
 tar -cvzf crownd.tar.gz -C src crownd
 ```
 
-Create a Git tag "bitcore-bin-<xxx>" where <xxx> is a 3-digit number:
+Create a Git tag "bitcore-bin-<xxx>" where `<xxx>` is a 3-digit number:
 
 ```bash
 git tag bitcore-bin-<xxx>
