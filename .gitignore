@@ -119,3 +119,5 @@ qa/pull-tester/test.*/*
 /doc/doxygen/
 
 wallet-utility
+
+/depends/x86_64-*
