@@ -12,6 +12,7 @@ cache:
   paths:
   - depends/built
   - depends/sdk-sources
+  policy: push
 
 .job_template: &job_definition
   stage: build
